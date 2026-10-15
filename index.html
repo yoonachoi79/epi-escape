@@ -1,0 +1,494 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>body{margin:0}[hidden]{display:none!important}img{max-width:100%}</style>
+<title>역학 연구소 방탈출</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+/* Layout: a single handheld "lab terminal" column for students scanning QR codes; the teacher view widens into a printable QR grid. Deliberately single dark theme (escape-room atmosphere); QR cards stay white. */
+:root{
+  --ink:#0e1820; --panel:#15232e; --panel2:#1b2c39; --line:#2b4050;
+  --text:#e7eef2; --muted:#94a8b5; --amber:#f0a83a; --amberInk:#1a1206;
+  --ok:#53c48f; --bad:#ef6b5c; --paper:#ffffff; --paperText:#15212b;
+  --display:"Black Han Sans","IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:dark;
+}
+body{background:var(--ink);color:var(--text);font-family:var(--body);font-size:16px;line-height:1.6}
+.hazard{height:8px;background:repeating-linear-gradient(-45deg,var(--amber) 0 12px,var(--ink) 12px 24px)}
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--ink);border-bottom:1px solid var(--line)}
+.bar-in{max-width:560px;margin:0 auto;padding-inline:16px;padding-block:10px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.wide .bar-in{max-width:1040px}
+.brand{font-family:var(--display);font-size:17px;letter-spacing:.02em;min-width:0}
+.brand small{display:block;font-family:var(--body);font-size:12px;color:var(--muted);letter-spacing:.06em}
+.clock{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:20px;color:var(--amber)}
+.wrap{max-width:560px;margin:0 auto;padding-inline:16px;padding-block:20px 56px;display:flex;flex-direction:column;gap:16px}
+.wide .wrap{max-width:1040px}
+h1,h2{font-family:var(--display);font-weight:400;line-height:1.25;text-wrap:balance;margin:0}
+h1{font-size:30px} h2{font-size:22px}
+p{margin:0}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber)}
+.muted{color:var(--muted)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:18px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.card.sub{background:var(--panel2)}
+.story{color:var(--muted);font-size:15px;border-left:3px solid var(--amber);padding-left:12px}
+.pips{display:flex;gap:6px;flex-wrap:wrap}
+.pip{width:22px;height:8px;border-radius:2px;background:var(--line)}
+.pip.on{background:var(--ok)} .pip.now{background:var(--amber)}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px;font-variant-numeric:tabular-nums}
+th,td{border:1px solid var(--line);padding:7px 8px;text-align:center;white-space:nowrap}
+th{background:var(--panel2);font-weight:600;color:var(--text)}
+td:first-child{font-weight:500}
+tr.sum td{background:var(--panel2)}
+.q{font-weight:600;font-size:17px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+input[type=text],select{flex:1 1 160px;min-width:0;background:var(--ink);color:var(--text);border:2px solid var(--line);border-radius:6px;padding:12px 14px;font-family:var(--mono);font-size:20px}
+select{font-family:var(--body);font-size:18px;flex:0 1 140px}
+input[type=text]:focus,select:focus{outline:none;border-color:var(--amber)}
+input.codein{text-transform:uppercase;letter-spacing:.3em}
+button,.btn{font-family:var(--body);font-weight:600;font-size:16px;border-radius:6px;padding:12px 18px;border:2px solid var(--amber);background:var(--amber);color:var(--amberInk);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
+button.ghost,.btn.ghost{background:transparent;color:var(--amber)}
+button.small,.btn.small{font-size:14px;padding:7px 12px}
+button:focus-visible,.btn:focus-visible,a:focus-visible{outline:3px solid var(--text);outline-offset:2px}
+.msg{font-weight:600}
+.msg.bad{color:var(--bad)} .msg.ok{color:var(--ok)}
+.hint{background:var(--panel2);border-radius:6px;padding:12px;font-size:15px}
+.shake{animation:shake .4s}
+@keyframes shake{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+.unlock{border-color:var(--ok)}
+.unlock .eyebrow{color:var(--ok)}
+.next{background:var(--ink);border:1px dashed var(--amber);border-radius:6px;padding:14px;display:flex;flex-direction:column;gap:6px}
+.next b{color:var(--amber)}
+.key{font-family:var(--mono);font-size:34px;font-weight:600;letter-spacing:.3em;color:var(--amber)}
+.code{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.code span{font-family:var(--mono);font-size:44px;font-weight:600;width:64px;height:84px;display:flex;align-items:center;justify-content:center;background:var(--ink);border:2px solid var(--ok);border-radius:6px;color:var(--ok)}
+.center{text-align:center;align-items:center}
+.tabs{display:flex;gap:8px;flex-wrap:wrap}
+.tabs button[aria-pressed=true]{background:var(--amber);color:var(--amberInk)}
+.tabs button[aria-pressed=false]{background:transparent;color:var(--amber)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.qr{background:var(--paper);color:var(--paperText);border-radius:6px;padding:14px;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;min-width:0}
+.qr .t{font-family:var(--display);font-size:20px}
+.qr .s{font-size:13px;color:#4a5a66}
+.qr .u{font-family:var(--mono);font-size:10px;color:#6b7a85;word-break:break-all}
+.qr .box{width:180px;height:180px;display:flex;align-items:center;justify-content:center}
+.qr .box img,.qr .box canvas{width:180px;height:180px}
+.warn{color:var(--amber);font-size:14px}
+label{font-size:14px;color:var(--muted)}
+a{color:var(--amber)}
+details summary{cursor:pointer;color:var(--amber);font-weight:600}
+@media (prefers-reduced-motion:reduce){.shake{animation:none}}
+@media print{
+  body{background:#fff}.bar,.noprint,.hazard{display:none!important}
+  .card{background:#fff;border:none;padding:0}
+  .grid{grid-template-columns:repeat(2,1fr)}
+  .qr{border:1px solid #999;break-inside:avoid}
+}
+</style>
+</head><body>
+
+<div id="app"></div>
+
+<script>
+/* ===================== 설정 (수정하는 곳) ===================== */
+// QR을 숨길 위치. 자물쇠 1~7번 순서.
+const PLACES = ["컴퓨터 모니터","교실 앞문","교실 뒷문","교탁 위","칠판 위쪽","왼쪽 교실 중간","오른쪽 교실 중간"];
+const TEAMS = 7;          // 조 수. n조는 자물쇠 n번에서 시작
+const PENALTY_SEC = 60;   // 힌트 1회당 추가 시간(초)
+
+const ROOMS = ["검역 게이트","환자 기록실","신규 감염 추적실","위험요인 분석실","표준화 연구실","환자대조군 분석실","집단발생 지휘소"];
+const STORIES = [
+  "연구소 입구의 검역 게이트가 잠겨 있다. 새로 도입한 선별검사의 성능을 정확히 입력해야 문이 열린다.",
+  "환자 기록실 캐비닛에 지역사회 조사 자료가 남아 있다. 이 지역의 질병 부담을 숫자로 입력하라.",
+  "추적실 모니터가 깜빡인다. 지난 1년간 새로 생긴 환자만 골라내야 잠금이 풀린다. 이미 환자였던 사람에게 속지 마라.",
+  "분석실 화이트보드에 2×2표가 그려져 있다. 노출이 질병 위험을 몇 배로 바꾸는지 계산하라.",
+  "연령 구조가 다른 두 집단의 사망률이 섞여 있다. 같은 기준 인구로 맞춰야 진실이 보인다.",
+  "서랍 속에 환자군과 대조군의 과거 노출 기록이 있다. 발생률을 구할 수 없는 연구에서 쓰는 지표로 잠금을 풀어라.",
+  "지휘소에 식중독 집단발생 보고서가 도착했다. 문제의 음식을 먹은 사람 중 몇 %가 발병했는지 입력하라."
+];
+const HINTS = [
+  "민감도 = 실제 환자 중 양성 / 특이도 = 실제 비환자 중 음성 / 양성예측도 = 양성 판정자 중 실제 환자 / 음성예측도 = 음성 판정자 중 실제 비환자",
+  "유병률 = 특정 시점의 환자 수(기존 + 신규) ÷ 그 시점 전체 인구 × 1,000",
+  "발생률의 분모는 '새로 병에 걸릴 수 있는 사람'입니다. 이미 환자인 사람을 분모에서 빼세요.",
+  "상대위험비 = 노출군의 발생률 ÷ 비노출군의 발생률. 각 행의 합계가 분모입니다.",
+  "① 두 집단 인구를 연령별로 합쳐 표준인구를 만든다 ② 표준인구 × 각 집단의 연령별 사망률 = 기대사망수 ③ 기대사망수 합 ÷ 표준인구 합 × 1,000",
+  "교차비 = (환자군 노출 × 대조군 비노출) ÷ (환자군 비노출 × 대조군 노출). 2×2표의 대각선끼리 곱하세요.",
+  "발병률 = 그 음식을 먹은 사람 중 발병자 ÷ 그 음식을 먹은 사람 × 100. 먹지 않은 사람은 분모에 넣지 않습니다."
+];
+
+function tbl(head, rows, sumLast){
+  const h = "<tr>"+head.map(x=>"<th>"+x+"</th>").join("")+"</tr>";
+  const b = rows.map((r,i)=>"<tr"+(sumLast&&i===rows.length-1?' class="sum"':"")+">"+r.map(x=>"<td>"+x+"</td>").join("")+"</tr>").join("");
+  return '<div class="tbl"><table><thead>'+h+"</thead><tbody>"+b+"</tbody></table></div>";
+}
+const H2x2 = ["선별검사","질병(+)","질병(−)","계"];
+const HDIRECT = ["연령","A집단 인구수","A 연령별 사망률","B집단 인구수","B 연령별 사망률"];
+const UNIT1000 = '<p class="muted">사망률 단위: 1,000명당</p>';
+
+// 중앙 금고 문제 (모든 분반 동일)
+const VAULT = {q:"유병률 ≈ 발생률 × ( ? )  빈칸에 들어갈 말은? (4글자)", acc:["이환기간","평균이환기간","유병기간"],
+  explain:"유병률 ≈ 발생률 × 평균 이환기간. 만성질환일수록 유병률이 발생률보다 훨씬 커집니다."};
+
+// 분반별 문제. code = 실제 자물쇠 비밀번호(자물쇠에 맞게 바꾸세요)
+const SECTIONS = {
+  a:{ name:"A반", code:"731", locks:[
+    {body:tbl(H2x2,[["양성",180,120,300],["음성",20,680,700],["계",200,800,1000]],true),
+     q:"이 선별검사의 양성예측도(%)는?", ans:60, tol:0.1, unit:"%",
+     explain:"양성예측도 = 180 ÷ 300 × 100 = 60%. (민감도 90%, 특이도 85%)"},
+    {body:"<p>총 인구가 4,000명인 지역사회에서 7월 1일 현재 고혈압 진단을 받은 환자는 300명이다.</p>",
+     q:"이 지역사회의 고혈압 유병률(1,000명당)은?", ans:75, tol:0.1, unit:"",
+     explain:"300 ÷ 4,000 × 1,000 = 75"},
+    {body:"<p>총 인구 4,000명, 기존 고혈압 환자 300명인 지역사회에서 지난 1년간 새로 고혈압 진단을 받은 사람이 37명이었다.</p>",
+     q:"1년간 고혈압 발생률(1,000명당)은?", ans:10, tol:0.1, unit:"",
+     explain:"37 ÷ (4,000 − 300) × 1,000 = 10. 분모에 4,000을 넣으면 9.25로 오답"},
+    {body:tbl(["흡연","만성폐질환(+)","만성폐질환(−)","계"],[["흡연",60,340,400],["비흡연",30,570,600],["계",90,910,1000]],true),
+     q:"흡연으로 인한 만성폐질환 발생의 상대위험비는?", ans:3, tol:0.01, unit:"배",
+     explain:"(60/400) ÷ (30/600) = 0.15 ÷ 0.05 = 3. 흡연자는 비흡연자보다 발생 위험이 3배"},
+    {body:tbl(HDIRECT,[["50세 미만","2,000",3,"4,000",2],["50세 이상","3,000",15,"1,000",25],["계","5,000","","5,000",""]],true)+UNIT1000,
+     q:"두 집단 인구를 합한 것을 표준인구로 직접표준화할 때, B집단의 보정사망률(1,000명당)은? (소수 첫째 자리까지)", ans:11.2, tol:0.05, unit:"",
+     explain:"표준인구 6,000 / 4,000(합 10,000). B 기대사망 = 6,000×2/1,000 + 4,000×25/1,000 = 12 + 100 = 112 → 11.2 (A집단은 78 → 7.8)"},
+    {body:"<p>폐암 환자 100명과 성별·연령이 비슷한 건강한 대조군 100명에게 과거 흡연 여부를 조사했다.</p>"+tbl(["과거 흡연","폐암 환자군","대조군"],[["흡연",60,20],["비흡연",40,80],["계",100,100]],true),
+     q:"흡연과 폐암의 교차비는?", ans:6, tol:0.01, unit:"",
+     explain:"교차비 = (60 × 80) ÷ (40 × 20) = 4,800 ÷ 800 = 6"},
+    {body:"<p>수련회 저녁 식사로 닭볶음탕을 먹은 학생 120명 중 36명, 먹지 않은 학생 40명 중 2명이 24시간 이내에 설사와 복통을 보였다.</p>",
+     q:"닭볶음탕을 먹은 학생의 발병률(%)은?", ans:30, tol:0.1, unit:"%",
+     explain:"36 ÷ 120 × 100 = 30%. (먹지 않은 학생은 2 ÷ 40 × 100 = 5%)"}
+  ]},
+  b:{ name:"B반", code:"264", locks:[
+    {body:tbl(H2x2,[["양성",300,60,360],["음성",100,540,640],["계",400,600,1000]],true),
+     q:"이 선별검사의 특이도(%)는?", ans:90, tol:0.1, unit:"%",
+     explain:"특이도 = 540 ÷ 600 × 100 = 90%. (민감도 75%, 양성예측도 약 83.3%)"},
+    {body:"<p>총 인구가 2,500명인 지역사회에서 7월 1일 현재 당뇨병 진단을 받은 환자는 250명이다.</p>",
+     q:"이 지역사회의 당뇨병 유병률(1,000명당)은?", ans:100, tol:0.1, unit:"",
+     explain:"250 ÷ 2,500 × 1,000 = 100"},
+    {body:"<p>총 인구 2,500명, 기존 당뇨병 환자 250명인 지역사회에서 지난 1년간 새로 당뇨병 진단을 받은 사람이 45명이었다.</p>",
+     q:"1년간 당뇨병 발생률(1,000명당)은?", ans:20, tol:0.1, unit:"",
+     explain:"45 ÷ (2,500 − 250) × 1,000 = 20. 분모에 2,500을 넣으면 18로 오답"},
+    {body:tbl(["나트륨 섭취","고혈압(+)","고혈압(−)","계"],[["많이 섭취",100,400,500],["적게 섭취",40,460,500],["계",140,860,1000]],true),
+     q:"나트륨 과다 섭취로 인한 고혈압 발생의 상대위험비는?", ans:2.5, tol:0.01, unit:"배",
+     explain:"(100/500) ÷ (40/500) = 0.2 ÷ 0.08 = 2.5"},
+    {body:tbl(HDIRECT,[["50세 미만","1,000",4,"3,000",5],["50세 이상","4,000",20,"2,000",15],["계","5,000","","5,000",""]],true)+UNIT1000,
+     q:"두 집단 인구를 합한 것을 표준인구로 직접표준화할 때, A집단의 보정사망률(1,000명당)은? (소수 첫째 자리까지)", ans:13.6, tol:0.05, unit:"",
+     explain:"표준인구 4,000 / 6,000(합 10,000). A 기대사망 = 4,000×4/1,000 + 6,000×20/1,000 = 16 + 120 = 136 → 13.6 (B집단은 110 → 11.0)"},
+    {body:"<p>위암 환자 100명과 대조군 100명에게 헬리코박터 파일로리 감염 이력을 조사했다.</p>"+tbl(["감염 이력","위암 환자군","대조군"],[["감염",50,25],["비감염",50,75],["계",100,100]],true),
+     q:"헬리코박터 감염과 위암의 교차비는?", ans:3, tol:0.01, unit:"",
+     explain:"교차비 = (50 × 75) ÷ (50 × 25) = 3,750 ÷ 1,250 = 3"},
+    {body:"<p>결혼식 뷔페에서 생굴을 먹은 하객 250명 중 50명, 먹지 않은 하객 150명 중 3명이 다음 날 구토와 설사를 보였다.</p>",
+     q:"생굴을 먹은 하객의 발병률(%)은?", ans:20, tol:0.1, unit:"%",
+     explain:"50 ÷ 250 × 100 = 20%. (먹지 않은 하객은 3 ÷ 150 × 100 = 2%)"}
+  ]},
+  c:{ name:"C반", code:"518", locks:[
+    {body:tbl(H2x2,[["양성",85,90,175],["음성",15,810,825],["계",100,900,1000]],true),
+     q:"이 선별검사의 민감도(%)는?", ans:85, tol:0.1, unit:"%",
+     explain:"민감도 = 85 ÷ 100 × 100 = 85%. (특이도 90%, 양성예측도 약 48.6%)"},
+    {body:"<p>총 인구가 6,000명인 지역사회에서 7월 1일 현재 고혈압 진단을 받은 환자는 720명이다.</p>",
+     q:"이 지역사회의 고혈압 유병률(1,000명당)은?", ans:120, tol:0.1, unit:"",
+     explain:"720 ÷ 6,000 × 1,000 = 120"},
+    {body:"<p>총 인구 6,000명, 기존 고혈압 환자 720명인 지역사회에서 지난 1년간 새로 고혈압 진단을 받은 사람이 132명이었다.</p>",
+     q:"1년간 고혈압 발생률(1,000명당)은?", ans:25, tol:0.1, unit:"",
+     explain:"132 ÷ (6,000 − 720) × 1,000 = 25. 분모에 6,000을 넣으면 22로 오답"},
+    {body:tbl(["신체활동","당뇨병(+)","당뇨병(−)","계"],[["규칙적 운동",30,570,600],["운동 안 함",50,350,400],["계",80,920,1000]],true),
+     q:"규칙적 운동으로 인한 당뇨병 발생의 상대위험비는?", ans:0.4, tol:0.01, unit:"배",
+     explain:"(30/600) ÷ (50/400) = 0.05 ÷ 0.125 = 0.4. 운동하는 군의 발생 위험이 0.4배, 즉 운동은 보호요인"},
+    {body:tbl(HDIRECT,[["50세 미만","2,500",2,"4,500",4],["50세 이상","2,500",24,"500",30],["계","5,000","","5,000",""]],true)+UNIT1000,
+     q:"두 집단 인구를 합한 것을 표준인구로 직접표준화할 때, B집단의 보정사망률(1,000명당)은? (소수 첫째 자리까지)", ans:11.8, tol:0.05, unit:"",
+     explain:"표준인구 7,000 / 3,000(합 10,000). B 기대사망 = 7,000×4/1,000 + 3,000×30/1,000 = 28 + 90 = 118 → 11.8 (A집단은 86 → 8.6)"},
+    {body:"<p>유방암 환자 100명과 대조군 100명에게 과거 호르몬 대체요법 사용 여부를 조사했다.</p>"+tbl(["호르몬 대체요법","유방암 환자군","대조군"],[["사용",40,25],["사용 안 함",60,75],["계",100,100]],true),
+     q:"호르몬 대체요법과 유방암의 교차비는?", ans:2, tol:0.01, unit:"",
+     explain:"교차비 = (40 × 75) ÷ (60 × 25) = 3,000 ÷ 1,500 = 2"},
+    {body:"<p>기숙사에서 점심으로 김밥을 먹은 학생 160명 중 40명, 먹지 않은 학생 80명 중 2명이 복통과 설사를 보였다.</p>",
+     q:"김밥을 먹은 학생의 발병률(%)은?", ans:25, tol:0.1, unit:"%",
+     explain:"40 ÷ 160 × 100 = 25%. (먹지 않은 학생은 2 ÷ 80 × 100 = 2.5%)"}
+  ]},
+  d:{ name:"D반", code:"849", locks:[
+    {body:tbl(H2x2,[["양성",160,40,200],["음성",40,760,800],["계",200,800,1000]],true),
+     q:"이 선별검사의 음성예측도(%)는?", ans:95, tol:0.1, unit:"%",
+     explain:"음성예측도 = 760 ÷ 800 × 100 = 95%. (민감도 80%, 특이도 95%, 양성예측도 80%)"},
+    {body:"<p>총 인구가 3,000명인 지역사회에서 7월 1일 현재 고혈압 진단을 받은 환자는 450명이다.</p>",
+     q:"이 지역사회의 고혈압 유병률(1,000명당)은?", ans:150, tol:0.1, unit:"",
+     explain:"450 ÷ 3,000 × 1,000 = 150"},
+    {body:"<p>총 인구 3,000명, 기존 고혈압 환자 450명인 지역사회에서 지난 1년간 새로 고혈압 진단을 받은 사람이 51명이었다.</p>",
+     q:"1년간 고혈압 발생률(1,000명당)은?", ans:20, tol:0.1, unit:"",
+     explain:"51 ÷ (3,000 − 450) × 1,000 = 20. 분모에 3,000을 넣으면 17로 오답"},
+    {body:tbl(["음주","간질환(+)","간질환(−)","계"],[["고위험 음주",45,255,300],["비고위험 음주",21,679,700],["계",66,934,1000]],true),
+     q:"고위험 음주로 인한 간질환 발생의 상대위험비는?", ans:5, tol:0.01, unit:"배",
+     explain:"(45/300) ÷ (21/700) = 0.15 ÷ 0.03 = 5"},
+    {body:tbl(HDIRECT,[["50세 미만","3,000",2,"2,000",3],["50세 이상","2,000",18,"3,000",12],["계","5,000","","5,000",""]],true)+UNIT1000,
+     q:"두 집단 인구를 합한 것을 표준인구로 직접표준화할 때, A집단의 보정사망률(1,000명당)은? (소수 첫째 자리까지)", ans:10, tol:0.05, unit:"",
+     explain:"표준인구 5,000 / 5,000(합 10,000). A 기대사망 = 5,000×2/1,000 + 5,000×18/1,000 = 10 + 90 = 100 → 10.0 (B집단은 75 → 7.5)"},
+    {body:"<p>방광암 환자 100명과 대조군 100명에게 과거 염료 취급 직업 경험을 조사했다.</p>"+tbl(["염료 취급 경험","방광암 환자군","대조군"],[["있음",75,30],["없음",25,70],["계",100,100]],true),
+     q:"염료 취급 직업과 방광암의 교차비는?", ans:7, tol:0.01, unit:"",
+     explain:"교차비 = (75 × 70) ÷ (25 × 30) = 5,250 ÷ 750 = 7"},
+    {body:"<p>회사 구내식당에서 냉면을 먹은 직원 300명 중 45명, 먹지 않은 직원 200명 중 4명이 구토와 설사를 보였다.</p>",
+     q:"냉면을 먹은 직원의 발병률(%)은?", ans:15, tol:0.1, unit:"%",
+     explain:"45 ÷ 300 × 100 = 15%. (먹지 않은 직원은 4 ÷ 200 × 100 = 2%)"}
+  ]}
+};
+/* ============================================================ */
+
+const app = document.getElementById("app");
+const mem = {};
+const store = {
+  get(k){ let v=null; try{ v=JSON.parse(localStorage.getItem(k)); }catch(e){} return v ?? mem[k] ?? null; },
+  set(k,v){ mem[k]=v; try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} },
+  del(k){ delete mem[k]; try{ localStorage.removeItem(k); }catch(e){} }
+};
+const key = s => "epi-escape2-"+s;
+const esc = s => String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const num = s => parseFloat(String(s).replace(/,/g,"").replace(/[^0-9.\-]/g,""));
+const norm = s => String(s).replace(/\s|\(|\)/g,"").toLowerCase();
+let tick=null;
+
+/* 열쇠 코드: 분반·조·단계마다 다른 3글자. 단계 0 = 출입 코드(교수자가 조별로 나눠 줌) */
+const ALPHA="ACEFHKMNPRTWXY3479";
+function keyCode(sec, team, step){
+  let h=2166136261; const str=sec+"|"+team+"|"+step+"|epi";
+  for(let i=0;i<str.length;i++){ h^=str.charCodeAt(i); h=Math.imul(h,16777619)>>>0; }
+  let out=""; for(let i=0;i<3;i++){ out+=ALPHA[h%ALPHA.length]; h=Math.floor(h/ALPHA.length)+ (i+7)*131; }
+  return out;
+}
+function nLocks(sec){ return SECTIONS[sec].locks.length; }
+function startOf(sec, team){ return ((team-1)%nLocks(sec))+1; }
+function orderOf(sec, team){ const N=nLocks(sec), s=startOf(sec,team); return Array.from({length:N},(_,i)=>((s-1+i)%N)+1); }
+function stepOf(sec, team, n){ return orderOf(sec,team).indexOf(n); }
+
+function teamForCode(sec, n, code){
+  for(let t=1;t<=TEAMS;t++){ if(keyCode(sec,t,stepOf(sec,t,n))===code) return t; }
+  return 0;
+}
+function teamForEntry(sec, code){
+  for(let t=1;t<=TEAMS;t++){ if(keyCode(sec,t,0)===code) return t; }
+  return 0;
+}
+function fmt(ms){ const t=Math.max(0,Math.floor(ms/1000)); return String(Math.floor(t/60)).padStart(2,"0")+":"+String(t%60).padStart(2,"0"); }
+function elapsed(st){ const end = st.done || Date.now(); return end - st.t0 + (st.hints||[]).length*PENALTY_SEC*1000; }
+
+function shell(sec, inner, wide){
+  document.body.classList.toggle("wide", !!wide);
+  const S = sec && SECTIONS[sec];
+  const st = sec && store.get(key(sec));
+  const timed = st && st.t0;
+  app.innerHTML =
+    '<div class="hazard"></div><header class="bar"><div class="bar-in"><div class="brand">역학 감염병 연구소<small>'+
+    (S? S.name+(st&&st.team?" · "+st.team+"조":"") : "EPIDEMIOLOGY ESCAPE")+'</small></div>'+
+    (timed? '<div class="clock" id="clock">'+fmt(elapsed(st))+'</div>' : "")+
+    '</div></header><main class="wrap">'+inner+'</main>';
+  clearInterval(tick);
+  if(timed && !st.done){ tick=setInterval(()=>{ const c=document.getElementById("clock"); const s=store.get(key(sec)); if(c&&s&&s.t0) c.textContent=fmt(elapsed(s)); },1000); }
+  window.scrollTo(0,0);
+}
+function pips(done, cur, N){
+  return '<div class="pips" aria-label="진행 상황">'+Array.from({length:N},(_,i)=>'<span class="pip'+(i<done?" on":i===cur?" now":"")+'"></span>').join("")+'</div>';
+}
+function shake(){ const c=document.getElementById("lockcard"); if(!c) return; c.classList.remove("shake"); void c.offsetWidth; c.classList.add("shake"); }
+
+/* ---------- 학생 화면 ---------- */
+function renderLock(sec, n){
+  const st = store.get(key(sec)) || {};
+  if(st.vault) return renderVault(sec);
+  const N = nLocks(sec);
+  // 이 기기에서 이미 연 자물쇠(같은 조)면 바로 문제로
+  if(st.team && st.open && st.open[n]) return showProblem(sec, n);
+  if(st.team && st.solved && st.solved[n]) return showSolved(sec, n);
+  // 열쇠 코드 입력
+  shell(sec,
+    '<section class="card" id="lockcard"><p class="eyebrow">자물쇠 '+n+' · '+ROOMS[n-1]+'</p><h2>잠겨 있는 자물쇠</h2>'+
+    '<p class="story">울산의 한 감염병 연구소. 정전으로 모든 문이 잠겼다. 자물쇠는 정해진 순서대로만 열리며, 각 자물쇠를 열 때마다 다음 자물쇠의 열쇠 코드가 나온다.</p>'+
+    '<p class="muted">앞 자물쇠를 풀고 받은 <b>열쇠 코드</b>를 입력하세요.</p>'+
+    '<form id="g" class="row"><input type="text" id="kc" class="codein" maxlength="3" autocomplete="off" autocapitalize="characters" placeholder="코드 3자리" required><button>열기</button></form>'+
+    '<p class="msg" id="msg" aria-live="polite"></p></section>'+resetBlock(sec,n));
+  bindReset(sec,n);
+  document.getElementById("g").addEventListener("submit",e=>{
+    e.preventDefault();
+    const code=document.getElementById("kc").value.trim().toUpperCase();
+    const team=teamForCode(sec,n,code);
+    const m=document.getElementById("msg");
+    if(team){
+      let s=store.get(key(sec))||{};
+      if(s.team!==team) s={team, t0:null, hints:[], open:{}, solved:{}, vault:false, done:null};
+      if(!s.t0) s.t0=Date.now();
+      s.open[n]=true; store.set(key(sec),s); showProblem(sec,n);
+    } else {
+      m.className="msg bad";
+      m.textContent = "열쇠 코드가 맞지 않습니다. 아직 이 자물쇠 차례가 아니거나 앞 자물쇠를 풀지 않았습니다.";
+      shake();
+    }
+  });
+}
+
+function showProblem(sec, n){
+  const S=SECTIONS[sec], L=S.locks[n-1], st=store.get(key(sec)), N=nLocks(sec);
+  const step=stepOf(sec,st.team,n); const used=(st.hints||[]).includes(n);
+  shell(sec,
+    '<section class="card" id="lockcard">'+pips(step,step,N)+
+    '<p class="eyebrow">'+(step+1)+'번째 자물쇠 / '+N+' · '+ROOMS[n-1]+'</p>'+
+    '<p class="story">'+STORIES[n-1]+'</p>'+L.body+
+    '<p class="q">'+L.q+'</p>'+
+    '<form id="f" class="row"><input type="text" id="ans" inputmode="decimal" autocomplete="off" placeholder="숫자만 입력" required><button>잠금 해제</button></form>'+
+    '<p class="msg" id="msg" aria-live="polite"></p>'+
+    '<div id="hintbox">'+(used? '<div class="hint">'+HINTS[n-1]+'</div>' : '<button class="ghost small" id="hintbtn" type="button">힌트 보기 (+'+PENALTY_SEC/60+'분)</button>')+'</div>'+
+    '</section>');
+  const hb=document.getElementById("hintbtn");
+  if(hb) hb.addEventListener("click",()=>{
+    document.getElementById("hintbox").innerHTML='<p class="warn">힌트를 열면 기록에 '+PENALTY_SEC/60+'분이 더해집니다.</p><div class="row"><button class="small" id="hy" type="button">힌트 열기</button><button class="ghost small" id="hn" type="button">취소</button></div>';
+    document.getElementById("hy").onclick=()=>{ const s=store.get(key(sec)); s.hints=s.hints||[]; if(!s.hints.includes(n)) s.hints.push(n); store.set(key(sec),s); document.getElementById("hintbox").innerHTML='<div class="hint">'+HINTS[n-1]+'</div>'; };
+    document.getElementById("hn").onclick=()=>showProblem(sec,n);
+  });
+  document.getElementById("f").addEventListener("submit",e=>{
+    e.preventDefault();
+    const v=num(document.getElementById("ans").value); const m=document.getElementById("msg");
+    if(!isNaN(v) && Math.abs(v-L.ans)<=L.tol+1e-9){
+      const s=store.get(key(sec)); s.solved=s.solved||{}; s.solved[n]=true; delete s.open[n];
+      if(step+1>=N) s.vault=true;
+      else { const nx=orderOf(sec,s.team)[step+1]; s.open[nx]=true; }  // 같은 기기는 다음 자물쇠 자동 개방
+      store.set(key(sec),s); showSolved(sec,n,true);
+    } else { m.className="msg bad"; m.textContent="잠금 해제 실패. 다시 계산해 보세요."; shake(); }
+  });
+}
+
+function showSolved(sec, n, fresh){
+  const S=SECTIONS[sec], L=S.locks[n-1], st=store.get(key(sec)), N=nLocks(sec);
+  const step=stepOf(sec,st.team,n); const last = step+1>=N;
+  const nx = last? null : orderOf(sec,st.team)[step+1];
+  shell(sec,'<section class="card unlock">'+pips(step+1,step+1,N)+'<p class="eyebrow">'+(step+1)+'번째 자물쇠 해제 · '+(step+1)+' / '+N+'</p><h2>'+(fresh?"잠금이 풀렸다":"이미 연 자물쇠입니다")+'</h2>'+
+    '<p>'+L.explain+'</p>'+
+    (last? '<div class="next">모든 자물쇠를 열었다. <b>중앙 금고</b>로 가자.</div><button id="go" type="button">중앙 금고 열기</button>'
+         : '<div class="next"><span>다음 목표: <b>자물쇠 '+nx+' · '+ROOMS[nx-1]+'</b></span><span>위치 단서: '+PLACES[nx-1]+'</span>'+
+           '<span class="muted">다음 자물쇠의 열쇠 코드</span><span class="key">'+keyCode(sec,st.team,step+1)+'</span>'+
+           '<span class="muted">이 휴대폰으로 QR을 찍으면 코드 없이 바로 열립니다. 다른 휴대폰으로 찍을 때만 코드를 입력하세요.</span></div>')+
+    '</section>');
+  if(last) document.getElementById("go").onclick=()=>renderVault(sec);
+}
+
+function renderVault(sec){
+  const S=SECTIONS[sec]; const st=store.get(key(sec));
+  if(st.done){
+    shell(sec,'<section class="card center unlock"><p class="eyebrow">탈출 성공</p><h1>금고 비밀번호</h1>'+
+      '<div class="code">'+S.code.split("").map(d=>"<span>"+esc(d)+"</span>").join("")+'</div>'+
+      '<p>선생님 책상 위 금고의 자물쇠를 이 번호로 여세요.</p>'+
+      '<p class="muted">'+st.team+'조 · 기록 '+fmt(elapsed(st))+((st.hints||[]).length?' (힌트 '+st.hints.length+'회 포함)':'')+'</p>'+
+      '<p class="muted" style="text-align:left">'+VAULT.explain+'</p></section>');
+    return;
+  }
+  const N=nLocks(sec);
+  shell(sec,'<section class="card" id="lockcard">'+pips(N,-1,N)+'<p class="eyebrow">중앙 금고 · 최종 관문</p><h2>마지막 개념을 입력하라</h2>'+
+    '<p class="story">금고 화면에 마지막 질문이 떠 있다. 숫자가 아니라 개념이다.</p>'+
+    '<p class="q">'+VAULT.q+'</p>'+
+    '<form id="f" class="row"><input type="text" id="ans" autocomplete="off" placeholder="정답 입력" required><button>금고 열기</button></form>'+
+    '<p class="msg" id="msg" aria-live="polite"></p></section>');
+  document.getElementById("f").addEventListener("submit",e=>{
+    e.preventDefault(); const v=norm(document.getElementById("ans").value);
+    if(VAULT.acc.map(norm).includes(v)){ const s=store.get(key(sec)); s.done=Date.now(); store.set(key(sec),s); renderVault(sec); }
+    else { const m=document.getElementById("msg"); m.className="msg bad"; m.textContent="금고가 열리지 않는다. 다시 생각해 보세요."; shake(); }
+  });
+}
+
+function resetBlock(){ return '<div class="noprint" id="rz"><button class="ghost small" type="button" id="rbtn">이 기기의 기록 지우기</button></div>'; }
+function bindReset(sec,n){
+  const b=document.getElementById("rbtn"); if(!b) return;
+  b.onclick=()=>{ document.getElementById("rz").innerHTML='<p class="warn">이 휴대폰의 진행 기록과 시간이 모두 사라집니다.</p><div class="row"><button class="small" id="ry" type="button">지우기</button><button class="ghost small" id="rn" type="button">취소</button></div>';
+    document.getElementById("ry").onclick=()=>{ store.del(key(sec)); renderLock(sec,n); };
+    document.getElementById("rn").onclick=()=>renderLock(sec,n); };
+}
+
+/* ---------- 시작 화면: 출입 코드만 넣으면 첫 문제가 바로 열림 ---------- */
+function renderStart(sec){
+  const st = store.get(key(sec));
+  if(st && st.team){
+    if(st.vault) return renderVault(sec);
+    const first = startOf(sec, st.team);
+    if(!(st.solved && st.solved[first])) return showProblem(sec, first);
+    const N=nLocks(sec), o=orderOf(sec,st.team);
+    const done=o.filter(n=>st.solved&&st.solved[n]).length;
+    return showSolved(sec, o[done-1]);
+  }
+  shell(sec,
+    '<section class="card" id="lockcard"><p class="eyebrow">연구소 진입</p><h1>정전된 연구소에 갇혔다</h1>'+
+    '<p class="story">울산의 한 감염병 연구소. 정전으로 모든 문이 잠겼다. 일곱 개의 잠금장치는 모두 역학 데이터로 잠겨 있고, 마지막 금고 안에 탈출 열쇠가 있다. 여러분은 오늘 배치된 신입 역학조사관이다.</p>'+
+    '<p class="muted">선생님께 받은 우리 조 <b>출입 코드</b>를 입력하면 타이머가 시작되고 첫 문제가 열립니다. 한 조는 휴대폰 한 대로 진행하세요.</p>'+
+    '<form id="g" class="row"><input type="text" id="kc" class="codein" maxlength="3" autocomplete="off" autocapitalize="characters" placeholder="출입 코드" required><button>진입</button></form>'+
+    '<p class="msg" id="msg" aria-live="polite"></p></section>');
+  document.getElementById("g").addEventListener("submit",e=>{
+    e.preventDefault();
+    const code=document.getElementById("kc").value.trim().toUpperCase();
+    const team=teamForEntry(sec,code);
+    if(!team){ const m=document.getElementById("msg"); m.className="msg bad"; m.textContent="출입 코드가 맞지 않습니다. "+SECTIONS[sec].name+" 우리 조 코드를 확인하세요."; shake(); return; }
+    const first=startOf(sec,team);
+    store.set(key(sec),{team, t0:Date.now(), hints:[], open:{[first]:true}, solved:{}, vault:false, done:null});
+    showProblem(sec, first);
+  });
+}
+
+/* ---------- 첫 화면 ---------- */
+function renderHome(){
+  shell(null,'<section class="card"><p class="eyebrow">역학 방탈출</p><h1>정전된 연구소를 탈출하라</h1>'+
+    '<p class="story">교실 곳곳에 숨겨진 QR 코드를 찍어 문제를 풀면 다음 자물쇠의 위치와 열쇠 코드가 나타납니다. 시작 QR을 찍고 출입 코드를 넣으면 첫 문제가 바로 열립니다. 일곱 개의 자물쇠를 모두 열고 최종 금고의 비밀번호를 찾으세요.</p>'+
+    '<p class="muted">학생은 QR 코드로 바로 문제 화면에 들어옵니다. 이 화면은 교수자용 입구입니다.</p>'+
+    '<div class="row"><a class="btn" href="#teacher">교수자 화면 (QR·출입 코드·정답)</a></div></section>');
+}
+
+/* ---------- 교수자 화면 ---------- */
+let tSec="a";
+function renderTeacher(){
+  let base=""; try{ base=localStorage.getItem("epi-escape-base")||""; }catch(e){}
+  const S=SECTIONS[tSec], N=S.locks.length;
+  const entry = Array.from({length:TEAMS},(_,i)=>[(i+1)+"조","자물쇠 "+startOf(tSec,i+1)+" ("+PLACES[startOf(tSec,i+1)-1]+")",'<b style="font-family:var(--mono);letter-spacing:.2em">'+keyCode(tSec,i+1,0)+'</b>']);
+  const allKeys = Array.from({length:TEAMS},(_,i)=>{ const t=i+1, o=orderOf(tSec,t); return [t+"조"].concat(o.map((n,st)=>"자물쇠 "+n+" · "+keyCode(tSec,t,st))); });
+  shell(null,
+    '<section class="card noprint"><p class="eyebrow">교수자 화면</p><h1>QR 코드와 정답</h1>'+
+    '<div class="tabs" role="group" aria-label="분반 선택">'+Object.keys(SECTIONS).map(k=>'<button type="button" data-sec="'+k+'" aria-pressed="'+(k===tSec)+'">'+SECTIONS[k].name+'</button>').join("")+'</div>'+
+    '<label for="base">학생에게 공유할 링크 (붙여 넣으면 QR이 그 주소로 만들어집니다)</label>'+
+    '<div class="row"><input type="text" id="base" value="'+esc(base)+'" placeholder="https://..." style="font-size:15px"><button type="button" id="apply" class="small">QR 만들기</button></div>'+
+    '<p class="warn" id="basewarn"></p></section>'+
+    '<section class="card noprint"><h2>'+S.name+' 조별 출입 코드</h2>'+
+    '<p class="muted">조마다 출입 코드를 쪽지로 나눠 주세요. 모든 조가 같은 <b>시작 QR</b>을 찍고 출입 코드만 입력하면, 조마다 정해진 첫 문제가 바로 열립니다(어디서 시작하는지 따로 안내할 필요 없음). 이후에는 문제를 풀 때마다 다음 QR 위치와 열쇠 코드가 나옵니다. 코드는 분반·조마다 달라서 다른 조 코드로는 열리지 않습니다.</p>'+
+    tbl(["조","첫 문제 (자동)","출입 코드"],entry)+
+    '<details><summary>전체 열쇠 코드표 (학생이 코드를 잃어버렸을 때)</summary>'+tbl(["조"].concat(Array.from({length:N},(_,i)=>(i+1)+"단계")),allKeys)+'</details></section>'+
+    '<section class="card"><h2>'+S.name+' QR 코드</h2><p class="muted noprint">시작 QR은 화면에 띄우거나 칠판에 붙이고, 자물쇠 QR 7장은 각 위치에 붙이세요.</p><div class="grid" id="qrs"></div></section>'+
+    '<section class="card noprint"><h2>'+S.name+' 정답표</h2>'+
+      tbl(["자물쇠","주제","정답","허용 오차"],S.locks.map((L,i)=>[i+1,ROOMS[i],L.ans+(L.unit||""),"±"+L.tol]).concat([["금고","개념 (전 분반 동일)",VAULT.acc[0],"띄어쓰기 무시"],["실물 자물쇠","비밀번호",S.code,"자물쇠와 맞추세요"]]))+
+      '<div class="row"><a class="btn ghost small" href="#'+tSec+'">'+S.name+' 시작 화면 미리 보기 (1조 출입 코드 '+keyCode(tSec,1,0)+')</a></div></section>'+
+    '<section class="card noprint"><h2>'+S.name+' 전체 문제 검토</h2><p class="muted">학생 화면에 나오는 문제와 정답, 정답 후 보이는 해설입니다.</p>'+
+      S.locks.map((L,i)=>'<div class="card sub"><p class="eyebrow">자물쇠 '+(i+1)+' · '+ROOMS[i]+' · 숨길 위치: '+PLACES[i]+'</p>'+L.body+'<p class="q">'+L.q+'</p><p><b style="color:var(--ok)">정답 '+L.ans+(L.unit||"")+'</b> <span class="muted">(±'+L.tol+' 허용, 단위 없이 숫자만 입력)</span></p><p class="muted">해설: '+L.explain+'</p><p class="muted">힌트: '+HINTS[i]+'</p></div>').join("")+
+      '<div class="card sub"><p class="eyebrow">중앙 금고 · 최종 관문 (전 분반 동일)</p><p class="q">'+VAULT.q+'</p><p><b style="color:var(--ok)">정답 '+VAULT.acc.join(" / ")+'</b></p><p class="muted">해설: '+VAULT.explain+'</p><p>실물 자물쇠 비밀번호: <b>'+S.code+'</b></p></div></section>'+
+    '<section class="card noprint"><h2>이 기기 기록 초기화</h2><p class="muted">미리 풀어 본 기록을 지웁니다. 학생 휴대폰의 기록에는 영향이 없습니다.</p><div><button class="ghost small" type="button" id="ra">모든 분반 기록 지우기</button></div></section>',
+    true);
+  document.querySelectorAll("[data-sec]").forEach(b=>b.onclick=()=>{ tSec=b.dataset.sec; renderTeacher(); });
+  document.getElementById("apply").onclick=()=>{ const v=document.getElementById("base").value.trim(); try{ localStorage.setItem("epi-escape-base",v); }catch(e){} drawQRs(v); };
+  document.getElementById("ra").onclick=()=>{ Object.keys(SECTIONS).forEach(k=>store.del(key(k))); document.getElementById("ra").textContent="지웠습니다"; };
+  drawQRs(base);
+}
+function drawQRs(base){
+  const w=document.getElementById("basewarn");
+  let b=(base||"").split("#")[0];
+  if(!b){ b=location.href.split("#")[0]; w.textContent="공유 링크가 아직 없습니다. 지금 QR은 이 화면 주소로 만들어져 학생 휴대폰에서 열리지 않을 수 있습니다."; }
+  else w.textContent="";
+  const g=document.getElementById("qrs"); g.innerHTML="";
+  const items=[{t:"시작 QR",s:SECTIONS[tSec].name+" · 출입 코드 입력",p:"화면에 띄우거나 칠판",h:tSec}].concat(
+    SECTIONS[tSec].locks.map((L,i)=>({t:"자물쇠 "+(i+1),s:SECTIONS[tSec].name+" · "+ROOMS[i],p:PLACES[i],h:tSec+(i+1)})));
+  items.forEach(it=>{
+    const url=b+"#"+it.h;
+    const d=document.createElement("div"); d.className="qr";
+    d.innerHTML='<div class="t">'+it.t+'</div><div class="s">'+it.s+'</div><div class="box"></div><div class="s">위치: '+it.p+'</div><div class="u">'+esc(url)+'</div>';
+    g.appendChild(d);
+    const box=d.querySelector(".box");
+    if(window.QRCode){ try{ new QRCode(box,{text:url,width:180,height:180,colorDark:"#000000",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.M}); }catch(e){ box.textContent="QR 생성 실패"; } }
+    else box.textContent="QR 라이브러리를 불러오지 못했습니다";
+  });
+}
+
+/* ---------- 라우터 ---------- */
+function route(){
+  const h=(location.hash||"").replace("#","").toLowerCase();
+  const m=h.match(/^([a-z])([1-9])$/);
+  if(m && SECTIONS[m[1]] && +m[2]<=SECTIONS[m[1]].locks.length) return renderLock(m[1], +m[2]);
+  if(SECTIONS[h]) return renderStart(h);
+  if(h==="teacher") return renderTeacher();
+  renderHome();
+}
+window.addEventListener("hashchange",route);
+route();
+</script>
+</body></html>
