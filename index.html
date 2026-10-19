@@ -133,7 +133,7 @@ const VAULT = {q:"유병률 ≈ 발생률 × ( ? )  빈칸에 들어갈 말은? 
 
 // 분반별 문제. code = 실제 자물쇠 비밀번호(자물쇠에 맞게 바꾸세요)
 const SECTIONS = {
-  a:{ name:"A반", code:"731", locks:[
+  a:{ name:"A반", code:"1996", locks:[
     {body:tbl(H2x2,[["양성",180,120,300],["음성",20,680,700],["계",200,800,1000]],true),
      q:"이 선별검사의 양성예측도(%)는?", ans:60, tol:0.1, unit:"%",
      explain:"양성예측도 = 180 ÷ 300 × 100 = 60%. (민감도 90%, 특이도 85%)"},
@@ -156,7 +156,7 @@ const SECTIONS = {
      q:"닭볶음탕을 먹은 학생의 발병률(%)은?", ans:30, tol:0.1, unit:"%",
      explain:"36 ÷ 120 × 100 = 30%. (먹지 않은 학생은 2 ÷ 40 × 100 = 5%)"}
   ]},
-  b:{ name:"B반", code:"264", locks:[
+  b:{ name:"B반", code:"1996", locks:[
     {body:tbl(H2x2,[["양성",300,60,360],["음성",100,540,640],["계",400,600,1000]],true),
      q:"이 선별검사의 특이도(%)는?", ans:90, tol:0.1, unit:"%",
      explain:"특이도 = 540 ÷ 600 × 100 = 90%. (민감도 75%, 양성예측도 약 83.3%)"},
@@ -179,7 +179,7 @@ const SECTIONS = {
      q:"생굴을 먹은 하객의 발병률(%)은?", ans:20, tol:0.1, unit:"%",
      explain:"50 ÷ 250 × 100 = 20%. (먹지 않은 하객은 3 ÷ 150 × 100 = 2%)"}
   ]},
-  c:{ name:"C반", code:"518", locks:[
+  c:{ name:"C반", code:"1996", locks:[
     {body:tbl(H2x2,[["양성",85,90,175],["음성",15,810,825],["계",100,900,1000]],true),
      q:"이 선별검사의 민감도(%)는?", ans:85, tol:0.1, unit:"%",
      explain:"민감도 = 85 ÷ 100 × 100 = 85%. (특이도 90%, 양성예측도 약 48.6%)"},
@@ -202,7 +202,7 @@ const SECTIONS = {
      q:"김밥을 먹은 학생의 발병률(%)은?", ans:25, tol:0.1, unit:"%",
      explain:"40 ÷ 160 × 100 = 25%. (먹지 않은 학생은 2 ÷ 80 × 100 = 2.5%)"}
   ]},
-  d:{ name:"D반", code:"849", locks:[
+  d:{ name:"D반", code:"1996", locks:[
     {body:tbl(H2x2,[["양성",160,40,200],["음성",40,760,800],["계",200,800,1000]],true),
      q:"이 선별검사의 음성예측도(%)는?", ans:95, tol:0.1, unit:"%",
      explain:"음성예측도 = 760 ÷ 800 × 100 = 95%. (민감도 80%, 특이도 95%, 양성예측도 80%)"},
@@ -367,7 +367,7 @@ function renderVault(sec){
   if(st.done){
     shell(sec,'<section class="card center unlock"><p class="eyebrow">탈출 성공</p><h1>금고 비밀번호</h1>'+
       '<div class="code">'+S.code.split("").map(d=>"<span>"+esc(d)+"</span>").join("")+'</div>'+
-      '<p>선생님 책상 위 금고의 자물쇠를 이 번호로 여세요.</p>'+
+      '<p>보물 수납함의 비밀번호를 가장 먼저 눌러 여는 조가 우승!</p>'+
       '<p class="muted">'+st.team+'조 · 기록 '+fmt(elapsed(st))+((st.hints||[]).length?' (힌트 '+st.hints.length+'회 포함)':'')+'</p>'+
       '<p class="muted" style="text-align:left">'+VAULT.explain+'</p></section>');
     return;
