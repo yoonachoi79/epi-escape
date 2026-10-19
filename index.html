@@ -369,8 +369,7 @@ function renderVault(sec){
       '<div class="code">'+S.code.split("").map(d=>"<span>"+esc(d)+"</span>").join("")+'</div>'+
       '<p>보물 수납함의 비밀번호를 가장 먼저 눌러 여는 조가 우승!</p>'+
       '<p class="muted">'+st.team+'조 · 기록 '+fmt(elapsed(st))+((st.hints||[]).length?' (힌트 '+st.hints.length+'회 포함)':'')+'</p>'+
-      '<p class="muted" style="text-align:left">'+VAULT.explain+'</p></section>'+resetBlock());
-    bindReset(sec,0,()=>renderVault(sec),()=>renderStart(sec));
+      '<p class="muted" style="text-align:left">'+VAULT.explain+'</p></section>');
     return;
   }
   const N=nLocks(sec);
@@ -387,12 +386,11 @@ function renderVault(sec){
 }
 
 function resetBlock(){ return '<div class="noprint" id="rz"><button class="ghost small" type="button" id="rbtn">이 기기의 기록 지우기</button></div>'; }
-function bindReset(sec,n,cancelFn,afterFn){
+function bindReset(sec,n){
   const b=document.getElementById("rbtn"); if(!b) return;
-  const cancel=cancelFn||(()=>renderLock(sec,n)), after=afterFn||(()=>renderLock(sec,n));
   b.onclick=()=>{ document.getElementById("rz").innerHTML='<p class="warn">이 휴대폰의 진행 기록과 시간이 모두 사라집니다.</p><div class="row"><button class="small" id="ry" type="button">지우기</button><button class="ghost small" id="rn" type="button">취소</button></div>';
-    document.getElementById("ry").onclick=()=>{ store.del(key(sec)); after(); };
-    document.getElementById("rn").onclick=cancel; };
+    document.getElementById("ry").onclick=()=>{ store.del(key(sec)); renderLock(sec,n); };
+    document.getElementById("rn").onclick=()=>renderLock(sec,n); };
 }
 
 /* ---------- 시작 화면: 출입 코드만 넣으면 첫 문제가 바로 열림 ---------- */
@@ -488,11 +486,6 @@ function route(){
   if(m && SECTIONS[m[1]] && +m[2]<=SECTIONS[m[1]].locks.length) return renderLock(m[1], +m[2]);
   if(SECTIONS[h]) return renderStart(h);
   if(h==="teacher") return renderTeacher();
-  if(h==="reset"){
-    Object.keys(SECTIONS).forEach(k=>store.del(key(k)));
-    shell(null,'<section class="card unlock"><p class="eyebrow">초기화 완료</p><h2>이 브라우저의 모든 분반 기록을 지웠습니다</h2><p class="muted">이제 시작 QR을 다시 찍으면 출입 코드 화면부터 시작합니다.</p></section>');
-    return;
-  }
   renderHome();
 }
 window.addEventListener("hashchange",route);
